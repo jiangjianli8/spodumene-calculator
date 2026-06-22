@@ -224,7 +224,7 @@ body {
 
 <div class="header">
   <h1>锂辉石计价器</h1>
-  <div class="sub">基于广期所实时行情 · 自动同步</div>
+      <div class="sub">基于广期所实时行情 · AKShare 自动同步</div>
   <div class="brand">佛山市鑫善源商贸有限公司 · 矿链通智助</div>
 </div>
 
@@ -322,12 +322,12 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="footer">矿链通智助 v3.3 · 数据来源 鑫善源自有行情服务</div>
+<div class="footer">矿链通智助 v3.4 · 数据来源 AKShare 新浪财经</div>
 
 <script>
 // ═══════════════════════════════════════════
-//  锂辉石计价器 v3.3 - H5 升级版
-//  基于鑫善源业务逻辑，优化交互体验
+//  锂辉石计价器 v3.4 - AKShare 自动行情
+//  基于鑫善源业务逻辑，新浪财经实时行情
 // ═══════════════════════════════════════════
 
 const TIERS = [
@@ -342,6 +342,9 @@ const TIERS = [
 const STORE_KEY = 'spodumene_params_v3';
 const HIST_KEY = 'spodumene_history_v3';
 const PRICE_URL = 'data/price.json';
+
+// 碳酸锂期货报价单位转换（元/吨 → 元/克）
+const PRICE_UNIT_DIVIDER = 1000;
 
 let spodumeneState = {
   contractCode: 'LC2609',
@@ -449,13 +452,21 @@ function fetchPrice() {
   fetch(PRICE_URL + '?_=' + Date.now())
     .then(r => r.json())
     .then(d => {
-      if (d.price) {
-        spodumeneState.price = d.price;
-        spodumeneState.date = d.date;
-        document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(d.price, 0);
-        document.getElementById('lcPriceDate').textContent = d.date + ' ' + (d.updated_at ? d.updated_at.slice(11, 16) : '');
-        btn.classList.remove('loading');
-      }
+      if (!d.price) throw new Error('no price');
+      // 期货原始报价为元/吨（如 161740），转换为计价器用的元/克（÷1000）
+      const rawPrice = d.price;
+      spodumeneState.price = rawPrice;
+      spodumeneState.date = d.date;
+      spodumeneState.updatedAt = d.updated_at || '';
+      spodumeneState.source = d.source || '';
+      spodumeneState.high = d.high || 0;
+      spodumeneState.low = d.low || 0;
+
+      document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(rawPrice, 0);
+      let dateStr = d.date;
+      if (d.updated_at) dateStr += ' ' + d.updated_at.slice(11, 16);
+      document.getElementById('lcPriceDate').textContent = dateStr;
+      btn.classList.remove('loading');
     })
     .catch(() => {
       btn.classList.remove('loading');
@@ -484,7 +495,7 @@ function calc() {
   const tag = document.getElementById('tierTag');
   tag.innerHTML = tier ? '<span class="tag ' + tier.cls + '">' + lio2.toFixed(1) + '%</span>' : '';
 
-  // 核心公式
+  // 核心公式（lc 为元/吨原始报价）
   const recD = rec / 100;
   const lio2D = lio2 / 100;
   const h = 30 / 74 / recD / lio2D;

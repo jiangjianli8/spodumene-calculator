@@ -1,7 +1,12 @@
 {
-  "symbol": "LC2609",
+  "symbol": "LC0",
   "price": 161740,
   "date": "2026-06-22",
-  "updated_at": "15:01",
-  "source": "sina_realtime"
+  "updated_at": "2026-06-23 07:28:51",
+  "high": 161800,
+  "low": 150860,
+  "open": 157220,
+  "volume": 328573,
+  "hold": 447324,
+  "source": "akshare_sina"
 }
