@@ -83,21 +83,19 @@ body {
 .price-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: #f8fafc;
   border-radius: 10px;
   padding: 10px 14px;
   margin-bottom: 12px;
 }
-.price-bar .label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-    .price-bar .price { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
-    .price-bar .change { font-size: 12px; font-weight: 600; }
-    .price-bar .change.up { color: #dc2626; }
-    .price-bar .change.down { color: #059669; }
-    .price-bar .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
-    .price-bar .status.realtime { background: #dbeafe; color: #1d4ed8; }
-    .price-bar .status.closed { background: #f1f5f9; color: #94a3b8; }
-.price-bar .date { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+.price-bar .price { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+.price-bar .change { font-size: 12px; font-weight: 600; }
+.price-bar .change.up { color: #dc2626; }
+.price-bar .change.down { color: #059669; }
+.price-bar .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+.price-bar .status.realtime { background: #dbeafe; color: #1d4ed8; }
+.price-bar .status.closed { background: #f1f5f9; color: #94a3b8; }
 .price-bar .refresh {
   font-size: 18px; cursor: pointer; padding: 4px; border-radius: 50%;
   transition: .2s; display: flex; align-items: center; justify-content: center;
@@ -237,13 +235,11 @@ body {
 <div class="container">
   <!-- 行情卡片 -->
   <div class="card">
-    <div class="card-title">📊 主力合约行情</div>
+    <div class="card-title">📊 主力合约行情 <span id="lcPriceDate" style="font-weight:400;font-size:11px;color:var(--text-muted)"></span></div>
     <div class="price-bar">
-      <span class="label" id="priceLabel">最新价</span>
       <span class="price" id="lcPriceDisplay">--</span>
       <span class="change" id="lcChangeDisplay"></span>
       <span class="status" id="lcStatusDisplay"></span>
-      <span class="date" id="lcPriceDate"></span>
       <span class="refresh" id="refreshBtn" onclick="fetchPrice()" title="刷新行情">↻</span>
     </div>
 
@@ -492,9 +488,11 @@ function fetchPrice() {
         stEl.className = 'status closed';
       }
 
-      let dateStr = d.date || '';
+      // 日期显示在标题行（→ 2026-06-23 09:06）
+      const dateEl = document.getElementById('lcPriceDate');
+      let dateStr = d.date ? '→ ' + d.date : '';
       if (d.tick_time) dateStr += ' ' + d.tick_time.slice(0, 5);
-      document.getElementById('lcPriceDate').textContent = dateStr;
+      dateEl.textContent = dateStr;
       btn.classList.remove('loading');
     })
     .catch(() => {
