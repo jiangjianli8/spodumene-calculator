@@ -491,12 +491,20 @@ function fetchPrice() {
         stEl.className = 'status closed';
       }
 
-      // 日期显示在标题行（→ 2026-06-23 09:06）
+      // 日期显示在标题行（→ 2026-06-23 09:06 ✓已刷新）
       const dateEl = document.getElementById('lcPriceDate');
       let dateStr = d.date ? '→ ' + d.date : '';
       if (d.tick_time) dateStr += ' ' + d.tick_time.slice(0, 5);
+      dateStr += ' ✓';
       dateEl.textContent = dateStr;
       btn.classList.remove('loading');
+      // 3秒后去掉✓，保持界面干净
+      clearTimeout(dateEl._timer);
+      dateEl._timer = setTimeout(function() {
+        let clean = d.date ? '→ ' + d.date : '';
+        if (d.tick_time) clean += ' ' + d.tick_time.slice(0, 5);
+        dateEl.textContent = clean;
+      }, 3000);
     })
     .catch(() => {
       btn.classList.remove('loading');
