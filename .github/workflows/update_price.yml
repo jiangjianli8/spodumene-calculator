@@ -28,13 +28,13 @@ jobs:
       - name: 循环更新行情（每5分钟，持续到15:15北京时间）
         run: |
           echo "开始循环更新行情..."
-          while true do
+          while true; do
             NOW=$(date -u +%H:%M)
-            echo "当前UTC时间: $NOW (北京时间: $(date -u -d '+8 hours' +%H:%M))"
+            echo "当前UTC时间: $NOW"
             
-            # 超过北京时间15:15（UTC 7:15）则退出
+            # 超过UTC 7:15（北京时间15:15）则退出
             if [ "$NOW" \> "07:15" ]; then
-              echo "已过收盘时间(15:15)，停止更新"
+              echo "已过收盘时间(北京时间15:15)，停止更新"
               break
             fi
             
