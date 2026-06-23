@@ -97,11 +97,14 @@ body {
 .price-bar .status.realtime { background: #dbeafe; color: #1d4ed8; }
 .price-bar .status.closed { background: #f1f5f9; color: #94a3b8; }
 .price-bar .refresh {
-  font-size: 18px; cursor: pointer; padding: 4px; border-radius: 50%;
-  transition: .2s; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  padding: 4px 10px; border-radius: 8px;
+  background: var(--primary); color: #fff;
+  border: none; transition: .15s;
+  display: flex; align-items: center; justify-content: center;
 }
-.price-bar .refresh:active { background: #e2e8f0; transform: rotate(180deg); }
-.price-bar .refresh.loading { animation: spin 1s linear infinite; }
+.price-bar .refresh:active { background: var(--primary-dark); transform: scale(.95); }
+.price-bar .refresh.loading { animation: spin 1s linear infinite; opacity: .7; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Form ── */
