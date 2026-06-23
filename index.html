@@ -327,7 +327,7 @@ body {
 
 <script>
 // ═══════════════════════════════════════════
-//  锂辉石计价器 v3.5 - 主力合约自动同步
+//  锂辉石计价器 v3.5 - 新浪财经实时行情
 //  基于鑫善源业务逻辑，新浪财经实时行情
 // ═══════════════════════════════════════════
 
@@ -464,8 +464,8 @@ function fetchPrice() {
       spodumeneState.low = d.low || 0;
 
       document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(rawPrice, 0);
-      let dateStr = d.date;
-      if (d.updated_at) dateStr += ' ' + d.updated_at.slice(11, 16);
+      let dateStr = d.date || '';
+      if (d.tick_time) dateStr += ' ' + d.tick_time.slice(0, 5);
       document.getElementById('lcPriceDate').textContent = dateStr;
       btn.classList.remove('loading');
     })
