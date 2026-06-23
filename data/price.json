@@ -1,12 +1,18 @@
 {
   "symbol": "LC0",
-  "price": 161740,
-  "date": "2026-06-22",
-  "updated_at": "2026-06-23 07:28:51",
-  "high": 161800,
-  "low": 150860,
-  "open": 157220,
-  "volume": 328573,
-  "hold": 447324,
-  "source": "akshare_sina"
+  "name": "碳酸锂连续",
+  "price": 158500,
+  "high": 159000,
+  "low": 157700,
+  "open": 158000,
+  "pre_close": 161740,
+  "change": -3240,
+  "change_pct": -2.0,
+  "volume": 24139,
+  "hold": 451121,
+  "date": "2026-06-23",
+  "tick_time": "09:02:48",
+  "status": "盘中实时",
+  "updated_at": "2026-06-23 09:03:02",
+  "source": "sina_realtime"
 }
