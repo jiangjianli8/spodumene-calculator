@@ -1,9 +1,9 @@
 name: 更新碳酸锂期货行情
 
 on:
-  # 每个交易日 9:00-15:15（北京时间 UTC+8 → UTC 1:00-7:15），每5分钟运行
+  # 每个交易日北京时间9:00触发（UTC 1:00）
   schedule:
-    - cron: '1/5 1-7 * * 1-5'
+    - cron: '0 1 * * 1-5'
   # 支持手动触发
   workflow_dispatch:
 
@@ -25,17 +25,36 @@ jobs:
       - name: 安装依赖
         run: pip install akshare
 
-      - name: 获取行情并更新 price.json
-        run: python update_price.py
-
-      - name: 提交推送到 GitHub
+      - name: 循环更新行情（每5分钟，持续到15:15北京时间）
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/price.json
-          if git diff --cached --quiet; then
-            echo "行情无变化，跳过推送"
-          else
-            git commit -m "auto: 更新碳酸锂期货行情 $(date -u +%Y-%m-%d_%H:%M)"
-            git push
-          fi
+          echo "开始循环更新行情..."
+          while true do
+            NOW=$(date -u +%H:%M)
+            echo "当前UTC时间: $NOW (北京时间: $(date -u -d '+8 hours' +%H:%M))"
+            
+            # 超过北京时间15:15（UTC 7:15）则退出
+            if [ "$NOW" \> "07:15" ]; then
+              echo "已过收盘时间(15:15)，停止更新"
+              break
+            fi
+            
+            # 获取行情
+            python update_price.py || echo "本次更新失败，继续下一轮"
+            
+            # 提交推送
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/price.json
+            if git diff --cached --quiet; then
+              echo "行情无变化，跳过推送"
+            else
+              git commit -m "auto: 更新碳酸锂期货行情 $(date -u +%Y-%m-%d_%H:%M)"
+              git push
+              echo "行情已推送到GitHub"
+            fi
+            
+            # 等待5分钟
+            echo "等待5分钟后再次更新..."
+            sleep 300
+          done
+          echo "今日行情更新完成"
