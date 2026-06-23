@@ -90,7 +90,13 @@ body {
   margin-bottom: 12px;
 }
 .price-bar .label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-.price-bar .price { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+    .price-bar .price { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+    .price-bar .change { font-size: 12px; font-weight: 600; }
+    .price-bar .change.up { color: #dc2626; }
+    .price-bar .change.down { color: #059669; }
+    .price-bar .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .price-bar .status.realtime { background: #dbeafe; color: #1d4ed8; }
+    .price-bar .status.closed { background: #f1f5f9; color: #94a3b8; }
 .price-bar .date { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
 .price-bar .refresh {
   font-size: 18px; cursor: pointer; padding: 4px; border-radius: 50%;
@@ -235,6 +241,8 @@ body {
     <div class="price-bar">
       <span class="label" id="priceLabel">最新价</span>
       <span class="price" id="lcPriceDisplay">--</span>
+      <span class="change" id="lcChangeDisplay"></span>
+      <span class="status" id="lcStatusDisplay"></span>
       <span class="date" id="lcPriceDate"></span>
       <span class="refresh" id="refreshBtn" onclick="fetchPrice()" title="刷新行情">↻</span>
     </div>
@@ -454,7 +462,6 @@ function fetchPrice() {
     .then(r => r.json())
     .then(d => {
       if (!d.price) throw new Error('no price');
-      // 期货原始报价为元/吨（如 161740），转换为计价器用的元/克（÷1000）
       const rawPrice = d.price;
       spodumeneState.price = rawPrice;
       spodumeneState.date = d.date;
@@ -464,6 +471,27 @@ function fetchPrice() {
       spodumeneState.low = d.low || 0;
 
       document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(rawPrice, 0);
+
+      // 涨跌显示
+      const chgEl = document.getElementById('lcChangeDisplay');
+      if (d.change != null && d.pre_close) {
+        const sign = d.change >= 0 ? '+' : '';
+        chgEl.textContent = sign + fmt(d.change, 0) + ' (' + (d.change_pct >= 0 ? '+' : '') + d.change_pct.toFixed(2) + '%)';
+        chgEl.className = 'change ' + (d.change >= 0 ? 'up' : 'down');
+      } else {
+        chgEl.textContent = '';
+      }
+
+      // 状态标签
+      const stEl = document.getElementById('lcStatusDisplay');
+      if (d.status === '盘中实时') {
+        stEl.textContent = '实时';
+        stEl.className = 'status realtime';
+      } else {
+        stEl.textContent = '收盘';
+        stEl.className = 'status closed';
+      }
+
       let dateStr = d.date || '';
       if (d.tick_time) dateStr += ' ' + d.tick_time.slice(0, 5);
       document.getElementById('lcPriceDate').textContent = dateStr;

@@ -6,6 +6,9 @@
 合约：LC0（碳酸锂连续主力合约）
 输出：data/price.json
 
+盘中：trade字段为实时成交价，close=0
+收盘后：close字段为收盘价，trade=0
+
 用法：
   python update_price.py           # 手动更新
   # 建议交易时段每5分钟执行一次，盘中实时刷新
@@ -25,13 +28,12 @@ SYMBOL = "碳酸锂"  # AKShare futures_zh_realtime 用品种中文名
 
 def fetch_lc_price():
     """从新浪财经获取碳酸锂期货实时行情（盘中实时刷新）"""
-    # 优先使用实时接口（交易时段可用，盘中秒级更新）
     df = ak.futures_zh_realtime(symbol=SYMBOL)
 
     if df.empty:
         raise ValueError(f"未获取到 {SYMBOL} 实时行情数据")
 
-    # 找到主力合约（LC0 连续合约，成交量最大）
+    # 找到主力合约（LC0 连续合约）
     main_row = df[df["symbol"] == "LC0"]
     if main_row.empty:
         # 如果没有LC0，取成交量最大的合约
@@ -39,15 +41,38 @@ def fetch_lc_price():
 
     row = main_row.iloc[0]
 
-    price = int(float(row["close"]))        # 最新价（收盘价/最新成交价）
-    high = int(float(row["high"]))           # 最高价
-    low = int(float(row["low"]))             # 最低价
-    open_price = int(float(row["open"]))     # 开盘价
-    volume = int(float(row["volume"]))       # 成交量
-    position = int(float(row["position"]))   # 持仓量
-    pre_close = int(float(row["preclose"]))  # 昨收价
-    tick_time = str(row["ticktime"])         # 行情时间
-    trade_date = str(row["tradedate"])       # 交易日期
+    # 盘中：trade有值（实时成交价），close=0
+    # 收盘后：close有值（收盘价），trade=0
+    trade_val = float(row["trade"])
+    close_val = float(row["close"])
+
+    if trade_val > 0:
+        # 盘中：取trade（实时成交价）
+        price = int(trade_val)
+        is_realtime = True
+    elif close_val > 0:
+        # 收盘后：取close（收盘价）
+        price = int(close_val)
+        is_realtime = False
+    else:
+        # 都没有（极端情况），用昨收
+        price = int(float(row["preclose"]))
+        is_realtime = False
+
+    high = int(float(row["high"]))
+    low = int(float(row["low"]))
+    open_price = int(float(row["open"]))
+    volume = int(float(row["volume"]))
+    position = int(float(row["position"]))
+    pre_close = int(float(row["preclose"]))
+    tick_time = str(row["ticktime"])
+    trade_date = str(row["tradedate"])
+
+    # 涨跌额和涨跌幅
+    change = price - pre_close
+    change_pct = (change / pre_close * 100) if pre_close > 0 else 0
+
+    status = "盘中实时" if is_realtime else "收盘"
 
     return {
         "symbol": row["symbol"],
@@ -57,10 +82,13 @@ def fetch_lc_price():
         "low": low,
         "open": open_price,
         "pre_close": pre_close,
+        "change": change,
+        "change_pct": round(change_pct, 2),
         "volume": volume,
         "hold": position,
         "date": trade_date,
         "tick_time": tick_time,
+        "status": status,
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "source": "sina_realtime",
     }
@@ -71,10 +99,11 @@ def save_price(data):
     os.makedirs(os.path.dirname(PRICE_FILE), exist_ok=True)
     with open(PRICE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    chg_str = f"{'+' if data['change'] >= 0 else ''}{data['change']}" 
     print(f"✅ 行情已更新: {PRICE_FILE}")
     print(f"   合约: {data['name']} ({data['symbol']})")
-    print(f"   最新: ¥{data['price']:,}/吨")
-    print(f"   日期: {data['date']} {data['tick_time']}")
+    print(f"   最新: ¥{data['price']:,}/吨 ({chg_str}, {data['change_pct']:+.2f}%)")
+    print(f"   时间: {data['date']} {data['tick_time']} [{data['status']}]")
     print(f"   来源: {data['source']}")
 
 
