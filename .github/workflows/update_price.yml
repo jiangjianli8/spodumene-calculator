@@ -1,0 +1,41 @@
+name: 更新碳酸锂期货行情
+
+on:
+  # 每个交易日 9:00-15:15（北京时间 UTC+8 → UTC 1:00-7:15），每5分钟运行
+  schedule:
+    - cron: '1/5 1-7 * * 1-5'
+  # 支持手动触发
+  workflow_dispatch:
+
+jobs:
+  update-price:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: pip install akshare
+
+      - name: 获取行情并更新 price.json
+        run: python update_price.py
+
+      - name: 提交推送到 GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/price.json
+          if git diff --cached --quiet; then
+            echo "行情无变化，跳过推送"
+          else
+            git commit -m "auto: 更新碳酸锂期货行情 $(date -u +%Y-%m-%d_%H:%M)"
+            git push
+          fi

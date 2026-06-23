@@ -632,7 +632,8 @@ window.addEventListener('load', function() {
   updateDeductionTip();
   fetchPrice();   // 页面加载时获取最新行情
   renderHistory();
-  // 不自动轮询，客户点刷新按钮获取最新价，计算时价格稳定不跳动
+  // 每5分钟自动刷新行情（与GitHub Actions同步节奏一致）
+  setInterval(fetchPrice, 300000);
 });
 </script>
 </body>
