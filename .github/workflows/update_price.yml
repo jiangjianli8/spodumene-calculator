@@ -1,7 +1,7 @@
 name: 更新碳酸锂期货行情
 
 on:
-  # 每个交易日北京时间9:00触发（UTC 1:00）
+  # 每个交易日北京时间9:00启动（UTC 1:00）
   schedule:
     - cron: '0 1 * * 1-5'
   # 支持手动触发
@@ -10,6 +10,7 @@ on:
 jobs:
   update-price:
     runs-on: ubuntu-latest
+    timeout-minutes: 420
     permissions:
       contents: write
 
@@ -25,18 +26,12 @@ jobs:
       - name: 安装依赖
         run: pip install akshare
 
-      - name: 循环更新行情（每5分钟，持续到15:15北京时间）
+      - name: 循环更新行情（每5分钟，覆盖交易时段及收盘后）
         run: |
-          echo "开始循环更新行情..."
+          echo "开始循环更新行情（每5分钟刷新，收盘后价格不变自动跳过）..."
           while true; do
             NOW=$(date -u +%H:%M)
             echo "当前UTC时间: $NOW"
-            
-            # 超过UTC 7:15（北京时间15:15）则退出
-            if [ "$NOW" \> "07:15" ]; then
-              echo "已过收盘时间(北京时间15:15)，停止更新"
-              break
-            fi
             
             # 获取行情
             python update_price.py || echo "本次更新失败，继续下一轮"
@@ -57,4 +52,3 @@ jobs:
             echo "等待5分钟后再次更新..."
             sleep 300
           done
-          echo "今日行情更新完成"
