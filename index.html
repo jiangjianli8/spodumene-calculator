@@ -349,7 +349,9 @@ const TIERS = [
 
 const STORE_KEY = 'spodumene_params_v3';
 const HIST_KEY = 'spodumene_history_v3';
-const PRICE_URL = 'data/price.json';
+// 优先用GitHub Raw（无CDN缓存），失败则回退GitHub Pages
+const PRICE_URL_GITHUB = 'https://raw.githubusercontent.com/jiangjianli8/spodumene-calculator/master/data/price.json';
+const PRICE_URL_PAGES = 'data/price.json';
 
 // 碳酸锂期货报价单位转换（元/吨 → 元/克）
 const PRICE_UNIT_DIVIDER = 1000;
@@ -457,9 +459,12 @@ function fetchPrice() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('loading');
 
-  fetch(PRICE_URL + '?_=' + Date.now())
-    .then(r => r.json())
-    .then(d => {
+  // 优先GitHub Raw（无CDN缓存），失败回退GitHub Pages
+  var url = PRICE_URL_GITHUB + '?_=' + Date.now();
+  fetch(url)
+    .then(function(r) { if (!r.ok) throw new Error('raw fail'); return r.json(); })
+    .catch(function() { return fetch(PRICE_URL_PAGES + '?_=' + Date.now()).then(function(r) { return r.json(); }); })
+    .then(function(d) {
       if (!d.price) throw new Error('no price');
       const rawPrice = d.price;
       spodumeneState.price = rawPrice;

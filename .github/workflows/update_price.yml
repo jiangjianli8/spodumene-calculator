@@ -26,25 +26,28 @@ jobs:
       - name: 安装依赖
         run: pip install akshare
 
-      - name: 循环更新行情（每5分钟，覆盖交易时段及收盘后）
+      - name: 循环更新行情（每5分钟）
         run: |
-          echo "开始循环更新行情（每5分钟刷新，收盘后价格不变自动跳过）..."
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "开始循环更新行情..."
           while true; do
             NOW=$(date -u +%H:%M)
-            echo "当前UTC时间: $NOW"
+            echo "=== 当前UTC时间: $NOW ==="
+            
+            # 先拉取远程最新（pages build会产生新commit）
+            git pull --rebase origin master || echo "pull失败，继续"
             
             # 获取行情
             python update_price.py || echo "本次更新失败，继续下一轮"
             
             # 提交推送
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
             git add data/price.json
             if git diff --cached --quiet; then
               echo "行情无变化，跳过推送"
             else
               git commit -m "auto: 更新碳酸锂期货行情 $(date -u +%Y-%m-%d_%H:%M)"
-              git push
+              git push origin master || echo "push失败，下一轮重试"
               echo "行情已推送到GitHub"
             fi
             
