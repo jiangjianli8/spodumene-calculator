@@ -41,7 +41,6 @@ body {
   padding-bottom: 40px;
 }
 
-/* ── Header ── */
 .header {
   background: var(--gradient-header);
   color: #fff;
@@ -56,10 +55,8 @@ body {
 .header .sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
 .header .brand { font-size: 11px; color: #64748b; margin-top: 4px; }
 
-/* ── Container ── */
 .container { padding: 12px; max-width: 480px; margin: 0 auto; }
 
-/* ── Card ── */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -79,7 +76,6 @@ body {
   gap: 6px;
 }
 
-/* ── Price Bar ── */
 .price-bar {
   display: flex;
   align-items: center;
@@ -107,13 +103,16 @@ body {
 .price-bar .refresh.loading { animation: spin 1s linear infinite; opacity: .7; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Form ── */
+.header .source-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
+.header .source-dot.live { background: #22c55e; animation: pulse 2s ease-in-out infinite; }
+.header .source-dot.delayed { background: #f59e0b; }
+.header .source-dot.offline { background: #94a3b8; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
 .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .form-row .field { flex: 1; }
 .field { margin-bottom: 8px; }
-.field label {
-  display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 3px;
-}
+.field label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 3px; }
 .field .input-wrap { position: relative; }
 .field input {
   width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
@@ -121,25 +120,17 @@ body {
   color: var(--text); outline: none; transition: .15s; background: #fff;
 }
 .field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.field .suffix {
-  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-  font-size: 11px; color: var(--text-muted); pointer-events: none;
-}
+.field .suffix { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-muted); pointer-events: none; }
 .note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-/* ── Buttons ── */
 .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-.btn {
-  flex: 1; padding: 13px 0; border: none; border-radius: 10px;
-  font-size: 16px; font-weight: 700; cursor: pointer; transition: .15s; text-align: center;
-}
+.btn { flex: 1; padding: 13px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: .15s; text-align: center; }
 .btn:active { transform: scale(.97); opacity: .9; }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:active { background: var(--primary-dark); }
 .btn-success { background: var(--success); color: #fff; }
 .btn-success:active { background: var(--success-dark); }
 
-/* ── Tier Tag ── */
 .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
 .tag-6 { background: var(--tier-6-bg); color: var(--tier-6-text); }
 .tag-5 { background: var(--tier-5-bg); color: var(--tier-5-text); }
@@ -148,95 +139,53 @@ body {
 .tag-2 { background: var(--tier-2-bg); color: var(--tier-2-text); }
 .tag-1 { background: var(--tier-1-bg); color: var(--tier-1-text); }
 
-/* ── Result Card ── */
-.result-card {
-  background: var(--card-bg); border-radius: var(--radius); overflow: hidden;
-  box-shadow: var(--shadow); margin-bottom: 10px; display: none;
-}
+.result-card { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin-bottom: 10px; display: none; }
 .result-card.show { display: block; animation: fadeIn .3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.result-header {
-  background: var(--gradient-result); color: #fff; padding: 10px 14px;
-  font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
-}
+.result-header { background: var(--gradient-result); color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
 .result-body { padding: 12px 14px; }
-.result-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 7px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
-}
+.result-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
 .result-row:last-child { border-bottom: none; }
 .result-label { color: var(--text-secondary); }
 .result-val { font-weight: 700; color: var(--text); }
 .result-val.big { font-size: 20px; color: var(--primary); }
 .result-val.dun { color: var(--success); }
 .result-val.usd { color: #7c3aed; }
-.copy-btn {
-  background: #f1f5f9; border: none; border-radius: 6px; padding: 4px 10px;
-  font-size: 11px; color: #475569; cursor: pointer;
-}
+.copy-btn { background: #f1f5f9; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; color: #475569; cursor: pointer; }
 .copy-btn:active { background: #e2e8f0; }
 
-/* ── Error Box ── */
-.error-box {
-  background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm);
-  padding: 10px 12px; margin-bottom: 10px; font-size: 13px; color: #dc2626; display: none;
-}
+.error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 10px; font-size: 13px; color: #dc2626; display: none; }
 
-/* ── History ── */
-.history-card {
-  background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px;
-  box-shadow: var(--shadow); margin-bottom: 10px; display: none;
-}
+.history-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); margin-bottom: 10px; display: none; }
 .history-card.show { display: block; animation: fadeIn .3s ease; }
-.history-card h3 {
-  font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.history-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 12px;
-}
+.history-card h3 { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
 .history-item .h-price { font-weight: 700; color: var(--primary); }
 .history-item .h-time { color: var(--text-muted); }
 .history-item:last-child { border-bottom: none; }
 
-/* ── Toast ── */
-.toast {
-  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-  background: #1e293b; color: #fff; padding: 8px 20px; border-radius: 20px;
-  font-size: 13px; opacity: 0; transition: opacity .3s; z-index: 999; pointer-events: none;
-}
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; z-index: 999; pointer-events: none; }
 .toast.show { opacity: 1; }
 
-/* ── Footer ── */
 .footer { text-align: center; padding: 16px; font-size: 11px; color: var(--text-muted); }
 
-/* ── Quick Presets ── */
 .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.preset-chip {
-  padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 600;
-  background: #f1f5f9; color: #475569; border: 1.5px solid transparent;
-  cursor: pointer; transition: .15s;
-}
+.preset-chip { padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 600; background: #f1f5f9; color: #475569; border: 1.5px solid transparent; cursor: pointer; transition: .15s; }
 .preset-chip:active { background: #e2e8f0; }
 .preset-chip.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
 
-/* ── Responsive ── */
-@media (min-width: 480px) {
-  .container { padding: 16px; }
-}
+@media (min-width: 480px) { .container { padding: 16px; } }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>锂辉石计价器</h1>
-      <div class="sub">基于广期所实时行情 · 主力合约自动同步</div>
+  <div class="sub"><span class="source-dot offline" id="sourceDot"></span> 广期所实时行情 · <span id="sourceLabel">连接中...</span></div>
   <div class="brand">佛山市鑫善源商贸有限公司 · 矿链通智助</div>
 </div>
 
 <div class="container">
-  <!-- 行情卡片 -->
   <div class="card">
     <div class="card-title">📊 主力合约行情 <span id="lcPriceDate" style="font-weight:400;font-size:11px;color:var(--text-muted)"></span></div>
     <div class="price-bar">
@@ -245,9 +194,7 @@ body {
       <span class="status" id="lcStatusDisplay"></span>
       <span class="refresh" id="refreshBtn" onclick="fetchPrice()" title="刷新行情">↻</span>
     </div>
-
-    <!-- 品位快捷预设 -->
-    <div class="quick-presets" id="quickPresets">
+    <div class="quick-presets">
       <span class="preset-chip" onclick="setPreset(3.0)">3.0%</span>
       <span class="preset-chip" onclick="setPreset(3.5)">3.5%</span>
       <span class="preset-chip" onclick="setPreset(4.0)">4.0%</span>
@@ -255,74 +202,40 @@ body {
       <span class="preset-chip" onclick="setPreset(5.0)">5.0%</span>
       <span class="preset-chip" onclick="setPreset(5.5)">5.5%</span>
     </div>
-
-    <!-- 输入表单 -->
     <div class="form-row">
       <div class="field">
         <label>🔬 Li₂O 品位 <span style="font-weight:400;color:var(--text-muted)">%</span></label>
-        <div class="input-wrap">
-          <input type="number" id="lio2" placeholder="例 5.0" value="5.0" step="0.1" inputmode="decimal">
-          <span class="suffix">%</span>
-        </div>
+        <div class="input-wrap"><input type="number" id="lio2" placeholder="例 5.0" value="5.0" step="0.1" inputmode="decimal"><span class="suffix">%</span></div>
       </div>
       <div class="field">
         <label>♻️ 回收率 <span style="font-weight:400;color:var(--text-muted)">%</span></label>
-        <div class="input-wrap">
-          <input type="number" id="recovery" placeholder="85" value="85" step="0.1" inputmode="decimal">
-          <span class="suffix">%</span>
-        </div>
+        <div class="input-wrap"><input type="number" id="recovery" placeholder="85" value="85" step="0.1" inputmode="decimal"><span class="suffix">%</span></div>
       </div>
     </div>
-
     <div class="field">
       <label>💰 扣减基准 D <span style="font-weight:400;color:var(--text-muted)">CNY/吨（品位自动匹配）</span></label>
-      <div class="input-wrap">
-        <input type="number" id="deduction" placeholder="例 23000" inputmode="numeric">
-        <span class="suffix">¥</span>
-      </div>
+      <div class="input-wrap"><input type="number" id="deduction" placeholder="例 23000" inputmode="numeric"><span class="suffix">¥</span></div>
       <div class="note" id="deductionTip">输入品位自动匹配 D</div>
     </div>
-
     <div class="btn-group">
       <button class="btn btn-primary" onclick="calc()">⚡ 计算单价</button>
       <button class="btn btn-success" onclick="copyResult()">📋 复制结果</button>
     </div>
   </div>
 
-  <!-- 错误提示 -->
   <div class="error-box" id="errorMsg"></div>
 
-  <!-- 结果卡片 -->
   <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <span>📋 计价结果 <span id="tierTag"></span></span>
-      <span class="copy-btn" onclick="copyResult()">📋 复制</span>
-    </div>
+    <div class="result-header"><span>📋 计价结果 <span id="tierTag"></span></span><span class="copy-btn" onclick="copyResult()">📋 复制</span></div>
     <div class="result-body">
-      <div class="result-row">
-        <span class="result-label">H (30÷74÷回收率÷品位)</span>
-        <span class="result-val" id="hDisplay">--</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">DMT 单价</span>
-        <span class="result-val big" id="dmtPrice">-- CNY</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">吨度价</span>
-        <span class="result-val dun" id="dunPrice">-- CNY</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">折合美元</span>
-        <span class="result-val usd" id="usdPrice">-- USD</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">合约价</span>
-        <span class="result-val" id="contractDisplay" style="color:#64748b;font-weight:400">LC2609 = --</span>
-      </div>
+      <div class="result-row"><span class="result-label">H (30÷74÷回收率÷品位)</span><span class="result-val" id="hDisplay">--</span></div>
+      <div class="result-row"><span class="result-label">DMT 单价</span><span class="result-val big" id="dmtPrice">-- CNY</span></div>
+      <div class="result-row"><span class="result-label">吨度价</span><span class="result-val dun" id="dunPrice">-- CNY</span></div>
+      <div class="result-row"><span class="result-label">折合美元</span><span class="result-val usd" id="usdPrice">-- USD</span></div>
+      <div class="result-row"><span class="result-label">合约价</span><span class="result-val" id="contractDisplay" style="color:#64748b;font-weight:400">LC0 = --</span></div>
     </div>
   </div>
 
-  <!-- 历史 -->
   <div class="history-card" id="historyCard">
     <h3><span>📜 计算历史</span><span class="copy-btn" onclick="clearHistory()">清空</span></h3>
     <div id="historyList"></div>
@@ -330,14 +243,9 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="footer">矿链通锂辉石计价器 v3.5 · 佛山鑫善源</div>
+<div class="footer">矿链通锂辉石计价器 v6.0 · 佛山鑫善源</div>
 
 <script>
-// ═══════════════════════════════════════════
-//  锂辉石计价器 v3.5 - 新浪财经实时行情
-//  基于鑫善源业务逻辑，新浪财经实时行情
-// ═══════════════════════════════════════════
-
 const TIERS = [
   { lo: 2, hi: 2.99, d: 26000, label: '2.0%-2.99%', cls: 'tag-1' },
   { lo: 3, hi: 3.49, d: 32000, label: '3.0%-3.49%', cls: 'tag-2' },
@@ -349,305 +257,191 @@ const TIERS = [
 
 const STORE_KEY = 'spodumene_params_v3';
 const HIST_KEY = 'spodumene_history_v3';
-// 优先用GitHub Raw（无CDN缓存），失败则回退GitHub Pages
-const PRICE_URL_GITHUB = 'https://raw.githubusercontent.com/jiangjianli8/spodumene-calculator/master/data/price.json';
-const PRICE_URL_PAGES = 'data/price.json';
 
-// 碳酸锂期货报价单位转换（元/吨 → 元/克）
-const PRICE_UNIT_DIVIDER = 1000;
+// Worker URL - 部署后替换 REPLACE_ME
+const PROXY = 'https://lc-realtime-proxy.REPLACE_ME.workers.dev/lc';
+const FALLBACK = 'https://raw.githubusercontent.com/jiangjianli8/spodumene-calculator/master/data/price.json';
+const POLL_LIVE = 3000;
+const POLL_SLOW = 300000;
 
-let spodumeneState = {
-  contractCode: 'LC2609',
-  price: 0,
-  date: '',
-  lastFetch: 0
-};
+let state = { price: 0, date: '', ts: 0, mode: 'init' };
 
-// ── 工具函数 ──
 function fmt(n, d) {
   if (n == null || isNaN(n)) return '--';
-  return n.toLocaleString('zh-CN', {
-    minimumFractionDigits: d,
-    maximumFractionDigits: d
-  });
+  return n.toLocaleString('zh-CN', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 
-function toast(msg, duration = 1500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+function toast(m, t) {
+  t = t || 1500;
+  var el = document.getElementById('toast');
+  el.textContent = m; el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.remove('show'); }, t);
 }
 
-function showError(msg) {
-  const err = document.getElementById('errorMsg');
-  err.textContent = msg;
-  err.style.display = 'block';
-}
+function showError(m) { var e = document.getElementById('errorMsg'); e.textContent = m; e.style.display = 'block'; }
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
 
-function hideError() {
-  document.getElementById('errorMsg').style.display = 'none';
-}
-
-// ── 品位档位 ──
-function getTier(lio2) {
-  for (let i = 0; i < TIERS.length; i++) {
-    if (lio2 >= TIERS[i].lo && lio2 <= TIERS[i].hi) return TIERS[i];
-  }
+function getTier(v) {
+  for (var i = 0; i < TIERS.length; i++) { if (v >= TIERS[i].lo && v <= TIERS[i].hi) return TIERS[i]; }
   return null;
 }
 
-// ── 快捷预设 ──
-function setPreset(val) {
-  const input = document.getElementById('lio2');
-  input.value = val;
-  // 高亮选中的 chip
-  document.querySelectorAll('.preset-chip').forEach(chip => {
-    chip.classList.toggle('active', parseFloat(chip.textContent) === val);
-  });
+function setPreset(v) {
+  document.getElementById('lio2').value = v;
+  document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.toggle('active', parseFloat(c.textContent) === v); });
   updateDeductionTip();
 }
 
-// ── 扣减基准自动匹配 ──
 function updateDeductionTip() {
-  const lio2 = parseFloat(document.getElementById('lio2').value);
-  const ded = document.getElementById('deduction');
-  const tip = document.getElementById('deductionTip');
-
-  if (isNaN(lio2) || lio2 < 2) {
-    tip.textContent = '输入品位自动匹配 D';
-    return;
-  }
-
-  const t = getTier(lio2);
-  if (!t) {
-    tip.textContent = '品位不在合同范围内';
-    return;
-  }
-
-  const cv = parseFloat(ded.value);
-  if (!ded.value || cv === t.d) {
-    ded.value = t.d;
-  }
-  tip.textContent = '↳ ' + t.label + ' → D = ¥' + fmt(t.d, 0);
+  var v = parseFloat(document.getElementById('lio2').value);
+  var t = document.getElementById('deductionTip');
+  if (isNaN(v) || v < 2) { t.textContent = '输入品位自动匹配 D'; return; }
+  var r = getTier(v);
+  if (!r) { t.textContent = '品位不在合同范围内'; return; }
+  var d = document.getElementById('deduction');
+  if (!d.value || parseFloat(d.value) === r.d) d.value = r.d;
+  t.textContent = '↳ ' + r.label + ' → D = ¥' + fmt(r.d, 0);
 }
 
-// ── 持久化 ──
 function saveParams() {
-  const p = {
-    l: document.getElementById('lio2').value,
-    r: document.getElementById('recovery').value,
-    d: document.getElementById('deduction').value
-  };
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(p)); } catch (e) {}
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ l: document.getElementById('lio2').value, r: document.getElementById('recovery').value, d: document.getElementById('deduction').value })); } catch(e) {}
 }
 
 function loadParams() {
-  try {
-    const p = JSON.parse(localStorage.getItem(STORE_KEY));
-    if (p) {
-      if (p.l) document.getElementById('lio2').value = p.l;
-      if (p.r) document.getElementById('recovery').value = p.r;
-      if (p.d) document.getElementById('deduction').value = p.d;
-    }
-  } catch (e) {}
+  try { var p = JSON.parse(localStorage.getItem(STORE_KEY)); if (p) { if(p.l) document.getElementById('lio2').value = p.l; if(p.r) document.getElementById('recovery').value = p.r; if(p.d) document.getElementById('deduction').value = p.d; } } catch(e) {}
 }
 
-// ── 行情获取 ──
-function fetchPrice() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('loading');
+function setMode(m) {
+  state.mode = m;
+  document.getElementById('sourceDot').className = 'source-dot ' + (m === 'realtime' ? 'live' : m === 'fallback' ? 'delayed' : 'offline');
+  document.getElementById('sourceLabel').textContent = { realtime: '实时 3秒刷新', fallback: '延时 ~5分钟', offline: '离线', init: '连接中...' }[m] || '连接中...';
+}
 
-  // 优先GitHub Raw（无CDN缓存），失败回退GitHub Pages
-  var url = PRICE_URL_GITHUB + '?_=' + Date.now();
-  fetch(url)
-    .then(function(r) { if (!r.ok) throw new Error('raw fail'); return r.json(); })
-    .catch(function() { return fetch(PRICE_URL_PAGES + '?_=' + Date.now()).then(function(r) { return r.json(); }); })
+function updateUI(d) {
+  state.price = d.price; state.date = d.date; state.ts = Date.now();
+  document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(d.price, 0);
+  var c = d.change || (d.price - d.pre_close);
+  var cp = d.change_pct || (d.pre_close ? (c / d.pre_close * 100) : 0);
+  if (d.pre_close) {
+    var el = document.getElementById('lcChangeDisplay');
+    el.textContent = (c >= 0 ? '+' : '') + fmt(c, 0) + ' (' + (cp >= 0 ? '+' : '') + cp.toFixed(2) + '%)';
+    el.className = 'change ' + (c >= 0 ? 'up' : 'down');
+  }
+  var s = document.getElementById('lcStatusDisplay');
+  if (d.status === '盘中实时') { s.textContent = '实时'; s.className = 'status realtime'; }
+  else { s.textContent = '收盘'; s.className = 'status closed'; }
+  var dt = document.getElementById('lcPriceDate');
+  var t = d.date ? '→ ' + d.date : '';
+  if (d.time) t += ' ' + d.time.slice(0, 5);
+  dt.textContent = t;
+}
+
+function fetchLive() {
+  var prev = state.mode;
+  fetch(PROXY + '?_=' + Date.now())
+    .then(function(r) { if(!r.ok) throw Error('x'); return r.json(); })
+    .then(function(d) { if(!d.price) throw Error('x'); updateUI(d); setMode('realtime'); if(prev === 'fallback') toast('⚡ 已切换到实时行情'); })
+    .catch(function() { setMode('fallback'); fetchFallback(); });
+}
+
+function fetchFallback() {
+  return fetch(FALLBACK + '?_=' + Date.now())
+    .then(function(r) { if(!r.ok) throw Error('x'); return r.json(); })
+    .catch(function() { return fetch('data/price.json?_=' + Date.now()).then(function(r) { return r.json(); }); })
     .then(function(d) {
-      if (!d.price) throw new Error('no price');
-      const rawPrice = d.price;
-      spodumeneState.price = rawPrice;
-      spodumeneState.date = d.date;
-      spodumeneState.updatedAt = d.updated_at || '';
-      spodumeneState.source = d.source || '';
-      spodumeneState.high = d.high || 0;
-      spodumeneState.low = d.low || 0;
-
-      document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(rawPrice, 0);
-
-      // 涨跌显示
-      const chgEl = document.getElementById('lcChangeDisplay');
-      if (d.change != null && d.pre_close) {
-        const sign = d.change >= 0 ? '+' : '';
-        chgEl.textContent = sign + fmt(d.change, 0) + ' (' + (d.change_pct >= 0 ? '+' : '') + d.change_pct.toFixed(2) + '%)';
-        chgEl.className = 'change ' + (d.change >= 0 ? 'up' : 'down');
-      } else {
-        chgEl.textContent = '';
-      }
-
-      // 状态标签
-      const stEl = document.getElementById('lcStatusDisplay');
-      if (d.status === '盘中实时') {
-        stEl.textContent = '实时';
-        stEl.className = 'status realtime';
-      } else {
-        stEl.textContent = '收盘';
-        stEl.className = 'status closed';
-      }
-
-      // 日期显示在标题行（→ 2026-06-23 09:06 ✓已刷新）
-      const dateEl = document.getElementById('lcPriceDate');
-      let dateStr = d.date ? '→ ' + d.date : '';
-      if (d.tick_time) dateStr += ' ' + d.tick_time.slice(0, 5);
-      dateStr += ' ✓';
-      dateEl.textContent = dateStr;
-      btn.classList.remove('loading');
-      // 3秒后去掉✓，保持界面干净
-      clearTimeout(dateEl._timer);
-      dateEl._timer = setTimeout(function() {
-        let clean = d.date ? '→ ' + d.date : '';
-        if (d.tick_time) clean += ' ' + d.tick_time.slice(0, 5);
-        dateEl.textContent = clean;
-      }, 3000);
+      if(!d.price) throw Error('x');
+      updateUI({ symbol: d.symbol||'LC0', price: d.price, open: d.open||0, high: d.high||0, low: d.low||0, pre_close: d.pre_close||0, volume: d.volume||0, position: d.hold||d.position||0, change: d.change||0, change_pct: d.change_pct||0, date: d.date||'', time: d.tick_time||'', status: d.status||'收盘' });
+      setMode('fallback');
     })
-    .catch(() => {
-      btn.classList.remove('loading');
-      toast('行情获取失败，请稍后重试', 2000);
-    });
+    .catch(function() { setMode('offline'); });
 }
 
-// ── 核心计算 ──
-function calc() {
-  const lio2 = parseFloat(document.getElementById('lio2').value);
-  const rec = parseFloat(document.getElementById('recovery').value);
-  const d = parseFloat(document.getElementById('deduction').value);
-  const lc = spodumeneState.price;
+function fetchPrice() {
+  var b = document.getElementById('refreshBtn'); b.classList.add('loading');
+  fetch(PROXY + '?_=' + Date.now())
+    .then(function(r) { if(!r.ok) throw Error('x'); return r.json(); })
+    .then(function(d) {
+      if(!d.price) throw Error('x');
+      updateUI(d); setMode('realtime');
+      var dt = document.getElementById('lcPriceDate');
+      dt.textContent = '→ ' + (d.date||'') + ' ' + (d.time||'').slice(0,5) + ' ✓';
+      clearTimeout(dt._t); dt._t = setTimeout(function() { dt.textContent = '→ ' + (d.date||'') + ' ' + (d.time||'').slice(0,5); }, 3000);
+    })
+    .catch(function() {
+      fetchFallback().then(function() {
+        var dt = document.getElementById('lcPriceDate'); dt.textContent += ' ✓';
+        setTimeout(function() { dt.textContent = dt.textContent.replace(' ✓',''); }, 3000);
+      });
+    })
+    .finally(function() { b.classList.remove('loading'); });
+}
 
+function calc() {
+  var lio2 = parseFloat(document.getElementById('lio2').value);
+  var rec = parseFloat(document.getElementById('recovery').value);
+  var d = parseFloat(document.getElementById('deduction').value);
+  var lc = state.price;
   hideError();
   document.getElementById('resultCard').classList.remove('show');
-
-  // 校验
-  if (!lc) { showError('⚠️ 合约价未获取，请点击 ↻ 刷新行情'); return; }
-  if (isNaN(lio2) || isNaN(rec) || isNaN(d)) { showError('⚠️ 请完整填写所有参数'); return; }
-  if (lio2 < 2) { showError('⚠️ Li₂O 低于 2.0%，买方有权拒收'); return; }
-  if (rec <= 0 || rec > 100) { showError('⚠️ 回收率应在 0-100% 之间'); return; }
-
-  // 档位标签
-  const tier = getTier(lio2);
-  const tag = document.getElementById('tierTag');
-  tag.innerHTML = tier ? '<span class="tag ' + tier.cls + '">' + lio2.toFixed(1) + '%</span>' : '';
-
-  // 核心公式（lc 为元/吨原始报价）
-  const recD = rec / 100;
-  const lio2D = lio2 / 100;
-  const h = 30 / 74 / recD / lio2D;
-  const base = lc - d;
-  const dmtPrice = base / h;
-  const dunPrice = dmtPrice / lio2;
-  const usdPrice = dmtPrice / 7.20;
-
-  // 展示结果
+  if(!lc) { showError('⚠️ 合约价未获取，请点击 ↻ 刷新行情'); return; }
+  if(isNaN(lio2)||isNaN(rec)||isNaN(d)) { showError('⚠️ 请完整填写所有参数'); return; }
+  if(lio2 < 2) { showError('⚠️ Li₂O 低于 2.0%，买方有权拒收'); return; }
+  if(rec <= 0 || rec > 100) { showError('⚠️ 回收率应在 0-100% 之间'); return; }
+  var tier = getTier(lio2);
+  document.getElementById('tierTag').innerHTML = tier ? '<span class="tag '+tier.cls+'">'+lio2.toFixed(1)+'%</span>' : '';
+  var h = 30 / 74 / (rec/100) / (lio2/100);
+  var dmt = (lc - d) / h;
   document.getElementById('hDisplay').textContent = h.toFixed(4);
-  document.getElementById('dmtPrice').textContent = '¥' + fmt(dmtPrice, 2);
-  document.getElementById('dunPrice').textContent = '¥' + fmt(dunPrice, 2);
-  document.getElementById('usdPrice').textContent = '$' + fmt(usdPrice, 2);
-  document.getElementById('contractDisplay').textContent = spodumeneState.contractCode + ' = ¥' + fmt(lc, 0);
-
+  document.getElementById('dmtPrice').textContent = '¥'+fmt(dmt,2);
+  document.getElementById('dunPrice').textContent = '¥'+fmt(dmt/lio2,2);
+  document.getElementById('usdPrice').textContent = '$'+fmt(dmt/7.20,2);
+  document.getElementById('contractDisplay').textContent = 'LC0 = ¥'+fmt(lc,0);
   document.getElementById('resultCard').classList.add('show');
   saveParams();
-  addHistory(lc, lio2, rec, d, dmtPrice);
-
-  // 滚动到结果
-  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  addHistory(lc, lio2, rec, d, dmt);
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-// ── 复制结果 ──
 function copyResult() {
-  const dmt = document.getElementById('dmtPrice').textContent;
-  const dun = document.getElementById('dunPrice').textContent;
-  const usd = document.getElementById('usdPrice').textContent;
-  const contract = document.getElementById('contractDisplay').textContent;
-
-  const text = [
-    '⚡ 锂辉石计价结果',
-    '━━━━━━━━━━━━━━',
-    'DMT 单价: ' + dmt,
-    '吨度价: ' + dun,
-    '折合美元: ' + usd,
-    '━━━━━━━━━━━━━━',
-    contract
-  ].join('\n');
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => toast('✅ 已复制到剪贴板'));
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('✅ 已复制到剪贴板');
-  }
+  var t = '⚡ 锂辉石计价结果\n━━━━━━━━━━━━━━\nDMT 单价: '+document.getElementById('dmtPrice').textContent+'\n吨度价: '+document.getElementById('dunPrice').textContent+'\n折合美元: '+document.getElementById('usdPrice').textContent+'\n━━━━━━━━━━━━━━\n'+document.getElementById('contractDisplay').textContent;
+  if(navigator.clipboard) { navigator.clipboard.writeText(t).then(function(){toast('✅ 已复制')}); }
+  else { var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('✅ 已复制'); }
 }
 
-// ── 历史记录 ──
-function addHistory(lc, lio2, rec, d, dmtPrice) {
+function addHistory(lc,lio2,rec,d,dmt) {
   try {
-    const hist = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
-    const now = new Date();
-    const entry = {
-      t: now.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-      lc, dmt: Math.round(dmtPrice),
-      lio2: lio2.toFixed(1), rec: rec.toFixed(1), d: d.toFixed(0)
-    };
-    hist.unshift(entry);
-    if (hist.length > 20) hist.pop();
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    var h=JSON.parse(localStorage.getItem(HIST_KEY))||[];
+    h.unshift({t:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),lc:lc,dmt:Math.round(dmt),lio2:lio2.toFixed(1),rec:rec.toFixed(1),d:d.toFixed(0)});
+    if(h.length>20) h.pop();
+    localStorage.setItem(HIST_KEY,JSON.stringify(h));
     renderHistory();
-  } catch (e) {}
+  }catch(e){}
 }
 
 function renderHistory() {
   try {
-    const hist = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
-    const el = document.getElementById('historyList');
-    const card = document.getElementById('historyCard');
-    if (hist.length === 0) { card.classList.remove('show'); return; }
+    var h=JSON.parse(localStorage.getItem(HIST_KEY))||[];
+    var el=document.getElementById('historyList'), card=document.getElementById('historyCard');
+    if(!h.length){card.classList.remove('show');return;}
     card.classList.add('show');
-    el.innerHTML = hist.map(h =>
-      '<div class="history-item">' +
-        '<span>¥' + h.dmt + ' / ' + h.lio2 + '% / D' + h.d + '</span>' +
-        '<span class="h-price">LC' + fmt(parseInt(h.lc), 0) + '</span>' +
-        '<span class="h-time">' + h.t + '</span>' +
-      '</div>'
-    ).join('');
-  } catch (e) {}
+    el.innerHTML=h.map(function(r){return '<div class="history-item"><span>¥'+r.dmt+' / '+r.lio2+'% / D'+r.d+'</span><span class="h-price">LC'+fmt(parseInt(r.lc),0)+'</span><span class="h-time">'+r.t+'</span></div>'}).join('');
+  }catch(e){}
 }
 
-function clearHistory() {
-  localStorage.removeItem(HIST_KEY);
-  renderHistory();
-  toast('🗑️ 历史已清空');
-}
+function clearHistory() { localStorage.removeItem(HIST_KEY); renderHistory(); toast('🗑️ 已清空'); }
 
-// ── 事件绑定 ──
 document.getElementById('lio2').addEventListener('input', updateDeductionTip);
-['lio2', 'recovery', 'deduction'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') calc();
-  });
-});
+['lio2','recovery','deduction'].forEach(function(id) { document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')calc()}); });
 
-// ── 初始化 ──
 window.addEventListener('load', function() {
-  loadParams();
-  updateDeductionTip();
-  fetchPrice();   // 页面加载时获取最新行情
-  renderHistory();
-  // 每5分钟自动刷新行情（与GitHub Actions同步节奏一致）
-  setInterval(fetchPrice, 300000);
+  loadParams(); updateDeductionTip(); setMode('init'); fetchLive(); renderHistory();
+  var poll = function() {
+    fetchLive();
+    clearTimeout(poll._t);
+    poll._t = setTimeout(poll, state.mode === 'realtime' ? POLL_LIVE : POLL_SLOW);
+  };
+  setTimeout(function() { poll._t = setTimeout(poll, state.mode === 'realtime' ? POLL_LIVE : POLL_SLOW); }, POLL_LIVE);
 });
 </script>
 </body>
