@@ -1,0 +1,3 @@
+name = "lc-realtime-proxy"
+main = "api/proxy.js"
+compatibility_date = "2025-01-01"
