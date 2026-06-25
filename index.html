@@ -301,7 +301,7 @@ function updateDeductionTip() {
   if (!r) { t.textContent = '品位不在合同范围内'; return; }
   var d = document.getElementById('deduction');
   if (!d.value || parseFloat(d.value) === r.d) d.value = r.d;
-  t.textContent = '↳ ' + r.label + ' → D = ¥' + fmt(r.d, 0);
+  t.textContent = '已根据品位自动匹配 D';
 }
 
 function saveParams() {
