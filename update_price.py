@@ -17,6 +17,7 @@
 import json
 import os
 import sys
+import time
 from datetime import datetime
 
 import akshare as ak
@@ -24,6 +25,9 @@ import akshare as ak
 
 PRICE_FILE = os.path.join(os.path.dirname(__file__), "data", "price.json")
 SYMBOL = "碳酸锂"  # AKShare futures_zh_realtime 用品种中文名
+
+MAX_RETRIES = 3      # 最大重试次数
+RETRY_DELAY = 10      # 重试间隔（秒）
 
 
 def fetch_lc_price():
@@ -47,15 +51,12 @@ def fetch_lc_price():
     close_val = float(row["close"])
 
     if trade_val > 0:
-        # 盘中：取trade（实时成交价）
         price = int(trade_val)
         is_realtime = True
     elif close_val > 0:
-        # 收盘后：取close（收盘价）
         price = int(close_val)
         is_realtime = False
     else:
-        # 都没有（极端情况），用昨收
         price = int(float(row["preclose"]))
         is_realtime = False
 
@@ -68,7 +69,6 @@ def fetch_lc_price():
     tick_time = str(row["ticktime"])
     trade_date = str(row["tradedate"])
 
-    # 涨跌额和涨跌幅
     change = price - pre_close
     change_pct = (change / pre_close * 100) if pre_close > 0 else 0
 
@@ -99,7 +99,7 @@ def save_price(data):
     os.makedirs(os.path.dirname(PRICE_FILE), exist_ok=True)
     with open(PRICE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    chg_str = f"{'+' if data['change'] >= 0 else ''}{data['change']}" 
+    chg_str = f"{'+' if data['change'] >= 0 else ''}{data['change']}"
     print(f"✅ 行情已更新: {PRICE_FILE}")
     print(f"   合约: {data['name']} ({data['symbol']})")
     print(f"   最新: ¥{data['price']:,}/吨 ({chg_str}, {data['change_pct']:+.2f}%)")
@@ -108,13 +108,19 @@ def save_price(data):
 
 
 def main():
-    try:
-        print("⏳ 正在获取碳酸锂期货实时行情...")
-        data = fetch_lc_price()
-        save_price(data)
-    except Exception as e:
-        print(f"❌ 行情更新失败: {e}", file=sys.stderr)
-        sys.exit(1)
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            print(f"⏳ 正在获取碳酸锂期货实时行情...（第 {attempt}/{MAX_RETRIES} 次）")
+            data = fetch_lc_price()
+            save_price(data)
+            return
+        except Exception as e:
+            if attempt < MAX_RETRIES:
+                print(f"⚠️ 第 {attempt} 次失败: {e}，{RETRY_DELAY}秒后重试...", file=sys.stderr)
+                time.sleep(RETRY_DELAY)
+            else:
+                print(f"❌ 行情更新失败（已重试 {MAX_RETRIES} 次）: {e}", file=sys.stderr)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
