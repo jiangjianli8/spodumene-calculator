@@ -1,17 +1,15 @@
 name: 更新碳酸锂期货行情
 
 on:
-  # 交易时段每5分钟触发（北京时间9:00-15:30 = UTC 1:00-7:30）
   schedule:
     - cron: '*/5 1-7 * * 1-5'
-    # 收盘后再跑几次确保收盘价更新（UTC 7:35, 7:50）
     - cron: '35,50 7 * * 1-5'
-  # 支持手动触发
   workflow_dispatch:
 
 jobs:
   update-price:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
 
@@ -32,10 +30,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 获取行情
           python update_price.py
           
-          # 提交推送
           git add data/price.json
           if git diff --cached --quiet; then
             echo "行情无变化，跳过推送"
