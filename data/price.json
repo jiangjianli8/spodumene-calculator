@@ -8,11 +8,11 @@
   "pre_close": 145860,
   "change": 3840,
   "change_pct": 2.63,
-  "volume": 118916,
-  "hold": 242771,
+  "volume": 120001,
+  "hold": 242322,
   "date": "2026-08-12",
-  "tick_time": "11:25:09",
+  "tick_time": "11:29:59",
   "status": "盘中实时",
-  "updated_at": "2026-08-12 03:25:13",
+  "updated_at": "2026-08-12 05:15:11",
   "source": "sina_realtime"
 }
