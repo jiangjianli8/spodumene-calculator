@@ -1,28 +1,128 @@
 /**
- * Cloudflare Worker - CORS proxy for Sina futures API
+ * 锂辉石计价器 - 实时行情代理
+ * Cloudflare Worker — 代理新浪财经 JSON API，添加 CORS 头
+ *
+ * 部署:
+ *   npx wrangler deploy api/proxy.js
  */
-const API = 'https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData';
-const PARAMS = 'page=1&sort=position&asc=0&node=lc_qh&base=futures';
-let cache = { d: null, t: 0 };
+
+// Sina 新浪财经 JSON API 配置
+const SINA_API = 'https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData';
+const SINA_PARAMS = new URLSearchParams({
+  page: '1',
+  sort: 'position',
+  asc: '0',
+  node: 'lc_qh',       // 碳酸锂品种代码
+  base: 'futures',
+});
+
+// 简单内存缓存，避免同一秒内重复请求 Sina
+const CACHE_TTL = 1500; // 1.5 秒
+let cache = { data: null, ts: 0 };
 
 export default {
-  async fetch(r) {
-    const u = new URL(r.url);
-    if (r.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': '*', 'Access-Control-Max-Age': '86400' } });
-    if (u.pathname.replace(/\/+$/, '') !== '/lc' && u.pathname !== '') return j({ e: 'Not Found' }, 404);
-    const n = Date.now();
-    if (cache.d && (n - cache.t) < 1500) return j(cache.d);
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    // CORS 预检
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Max-Age': '86400',
+        },
+      });
+    }
+
+    // 路径: /lc → 返回碳酸锂主力合约
+    const path = url.pathname.replace(/\/+$/, '');
+    if (path !== '/lc' && path !== '') {
+      return json({ error: 'Not Found', hint: 'Use /lc for carbonate lithium' }, 404);
+    }
+
+    // 缓存检查
+    const now = Date.now();
+    if (cache.data && (now - cache.ts) < CACHE_TTL) {
+      return json(cache.data);
+    }
+
     try {
-      const res = await fetch(API + '?' + PARAMS, { headers: { 'Referer': 'https://finance.sina.com.cn/', 'User-Agent': 'Mozilla/5.0' } });
-      if (!res.ok) return j({ e: 'Upstream ' + res.status }, 502);
-      const arr = await res.json();
-      if (!arr || !arr.length) return j({ e: 'No data' }, 502);
-      let item = arr.find(c => c.symbol === 'LC0') || arr.reduce((a, b) => (+a.volume || 0) > (+b.volume || 0) ? a : b);
-      const p = +item.trade || 0, pc = +item.preclose || 0, cp = +item.changepercent || 0;
-      const out = { symbol: item.symbol || 'LC0', name: item.name || '', price: Math.round(p), open: Math.round(+item.open || 0), high: Math.round(+item.high || 0), low: Math.round(+item.low || 0), pre_close: Math.round(pc), bid: Math.round(+item.bidprice1 || 0), ask: Math.round(+item.askprice1 || 0), volume: +item.volume || 0, position: +item.position || 0, change: Math.round(p - pc), change_pct: Math.round(cp * 100) / 100, date: item.tradedate || '', time: item.ticktime || '', status: (+item.close === 0 && p > 0) ? '盘中实时' : '收盘', updated_at: new Date().toISOString() };
-      cache = { d: out, t: n };
-      return j(out);
-    } catch (e) { return j({ e: 'Fetch failed', d: e.message }, 502); }
-  }
+      // 请求新浪 API
+      const sinaResp = await fetch(`${SINA_API}?${SINA_PARAMS}`, {
+        headers: {
+          'Referer': 'https://finance.sina.com.cn/',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      });
+
+      if (!sinaResp.ok) {
+        return json({ error: `Sina API returned ${sinaResp.status}` }, 502);
+      }
+
+      const contracts = await sinaResp.json();
+      if (!Array.isArray(contracts) || contracts.length === 0) {
+        return json({ error: 'No contract data from exchange' }, 502);
+      }
+
+      // 找 LC0（连续合约/主力合约）
+      let item = contracts.find(c => c.symbol === 'LC0');
+      if (!item) {
+        item = contracts.reduce((a, b) =>
+          (parseInt(a.volume) || 0) > (parseInt(b.volume) || 0) ? a : b
+        );
+      }
+
+      const price = parseFloat(item.trade) || 0;
+      const preClose = parseFloat(item.preclose) || 0;
+      const changePct = parseFloat(item.changepercent) || 0;
+
+      const result = {
+        symbol: item.symbol || 'LC0',
+        name: item.name || '碳酸锂',
+        price: Math.round(price),
+        open: Math.round(parseFloat(item.open) || 0),
+        high: Math.round(parseFloat(item.high) || 0),
+        low: Math.round(parseFloat(item.low) || 0),
+        pre_close: Math.round(preClose),
+        bid: Math.round(parseFloat(item.bidprice1) || 0),
+        ask: Math.round(parseFloat(item.askprice1) || 0),
+        volume: parseInt(item.volume) || 0,
+        position: parseInt(item.position) || 0,
+        change: Math.round(price - preClose),
+        change_pct: Math.round(changePct * 100) / 100,
+        date: item.tradedate || '',
+        time: item.ticktime || '',
+        status: '盘中实时',
+        updated_at: new Date().toISOString(),
+        features: {
+          showFillBtn: true,
+          refreshInterval: 5000,
+          showBrandCard: true,
+          showErrorDetail: true,
+        },
+      };
+
+      // 更新缓存
+      cache = { data: result, ts: now };
+
+      return json(result);
+
+    } catch (err) {
+      return json({ error: 'Failed to fetch market data', detail: err.message }, 502);
+    }
+  },
 };
-function j(d, s) { return new Response(JSON.stringify(d), { status: s || 200, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' } }); }
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data, null, 2), {
+    status,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
+  });
+}
