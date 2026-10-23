@@ -829,7 +829,16 @@ function updateUI(d) {
   state.price = d.price; state.date = d.date; state.ts = Date.now();
   document.getElementById('lcPriceDisplay').textContent = '¥' + fmt(d.price, 0);
   var c = d.change || (d.price - d.pre_close);
-  var cp = d.change_pct || (d.pre_close ? (c / d.pre_close * 100) : 0);
+  // 涨跌幅一律以"涨跌额/昨收"自算为准（百分数），不直接信上游 change_pct，
+  // 避免不同数据源口径不一（比例 vs 百分数）导致数字差 100 倍。
+  // 缺昨收时才退回 change_pct，并按量级归一化：|x|<=1 视为比例，×100。
+  var cp;
+  if (d.pre_close) {
+    cp = c / d.pre_close * 100;
+  } else {
+    cp = d.change_pct || 0;
+    if (Math.abs(cp) <= 1) cp = cp * 100;
+  }
   if (d.pre_close) {
     var el = document.getElementById('lcChangeDisplay');
     el.textContent = (c >= 0 ? '+' : '') + fmt(c, 0) + ' (' + (cp >= 0 ? '+' : '') + cp.toFixed(2) + '%)';
