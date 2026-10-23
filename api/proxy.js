@@ -92,10 +92,10 @@ export default {
         volume: parseInt(item.volume) || 0,
         position: parseInt(item.position) || 0,
         change: Math.round(price - preClose),
-        // 涨跌幅统一输出"百分数"（如 -3.02 表示 -3.02%）。
-        // 新浪 changepercent 是比例值（-0.0302），须 ×100 再取两位，与
-        // update_price.py / xsyklt_api.py 的口径保持一致。
-        change_pct: Math.round(changePct * 10000) / 100,
+        // 涨跌幅统一输出"百分数"，且一律用「(现价-昨收)/昨收」自算。
+        // 原因：新浪 changepercent 对连续合约 LC0 时准时不准（实测 +0.06 vs 真实 +0.40），
+        // 自算可保证与 change 字段、与 update_price.py / xsyklt_api.py 完全一致。
+        change_pct: (price > 0 && preClose > 0) ? Math.round((price - preClose) / preClose * 10000) / 100 : 0,
         date: item.tradedate || '',
         time: item.ticktime || '',
         status: '盘中实时',
