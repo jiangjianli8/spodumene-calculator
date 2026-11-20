@@ -110,12 +110,48 @@ def fetch_price_json(repo: str):
     return None
 
 
+DEFAULT_SOURCE_HINTS = ("default", "默认", "fallback")
+
+
+def collect_sources(obj):
+    """递归收集 price.json 里所有 source 字段（znpb 的结构是 zn/pb 子对象）"""
+    found = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k == "source" and isinstance(v, str):
+                    found.append(v)
+                else:
+                    walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    walk(obj)
+    return found
+
+
 def check_data_freshness(repo: str):
-    """数据新鲜度：非交易日不判；交易日超过 1 天未更新即告警"""
+    """数据新鲜度：非交易日不判；交易日超过 1 天未更新即告警
+
+    注意：只看 updated_at 会被「抓价失败写默认价 + 时间戳打当前时间」骗过去——
+    所以必须先查 source / is_realtime，默认参考价一律判故障。
+    """
     pj = fetch_price_json(repo)
     if not pj:
         return True, "无 price.json（跳过新鲜度检查）"
 
+    # ① 默认价 / 非实时 检测（优先级高于时间检查）
+    if pj.get("is_realtime") is False:
+        return False, "数据源标记为非实时（is_realtime=false）"
+
+    sources = collect_sources(pj)
+    bad = [s for s in sources if any(h in s.lower() for h in DEFAULT_SOURCE_HINTS)]
+    if bad:
+        return False, "数据源是默认参考价而非实时行情：%s" % "、".join(sorted(set(bad)))
+
+    # ② 时间新鲜度
     raw = pj.get("updated_at") or pj.get("date") or ""
     if not raw:
         return True, "price.json 无时间字段（跳过）"

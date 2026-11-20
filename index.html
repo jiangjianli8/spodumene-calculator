@@ -773,6 +773,26 @@ const POLL_SLOW = 300000;
 
 let state = { price: 0, date: '', ts: 0, mode: 'init' };
 
+// 美元折算汇率：页面加载后尝试取实时价，取不到才用这个兜底值。
+// 2026-11-20 实测 USD/CNY ≈ 6.69（新浪 6.6728 / 中行 6.7131 / er-api 6.6920 三源一致），
+// 原代码写死 7.20，会让折合美元系统性偏低约 7%。
+var fxRate = 6.70;
+var fxSource = 'fallback';
+
+function fetchLiveFX() {
+  fetch('https://open.er-api.com/v6/latest/USD')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.rates && d.rates.CNY > 0) {
+        fxRate = d.rates.CNY;
+        fxSource = 'live';
+        var el = document.getElementById('usdPrice');
+        if (el && el.textContent !== '--') calc();
+      }
+    })
+    .catch(function () { /* 静默：保留兜底汇率 */ });
+}
+
 function fmt(n, d) {
   if (n == null || isNaN(n)) return '--';
   return n.toLocaleString('zh-CN', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -790,7 +810,13 @@ function showError(m) { var e = document.getElementById('errorMsg'); e.textConte
 function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
 
 function getTier(v) {
-  for (var i = 0; i < TIERS.length; i++) { if (v >= TIERS[i].lo && v <= TIERS[i].hi) return TIERS[i]; }
+  // 修复：原写法用 [lo, hi] 闭区间，2.995/3.495 这类值落在档位缝隙里返回 null，
+  // 导致 D 不更新、静默沿用上一次扣减。改为按「下一档下界」划分的连续区间。
+  for (var i = 0; i < TIERS.length; i++) {
+    var lo = TIERS[i].lo;
+    var nextLo = (i + 1 < TIERS.length) ? TIERS[i + 1].lo : Infinity;
+    if (v >= lo && v < nextLo) return TIERS[i];
+  }
   return null;
 }
 
@@ -917,7 +943,7 @@ function calc() {
   document.getElementById('hDisplay').textContent = h.toFixed(4);
   document.getElementById('dmtPrice').textContent = '¥'+fmt(dmt,2);
   document.getElementById('dunPrice').textContent = '¥'+fmt(dmt/lio2,2);
-  document.getElementById('usdPrice').textContent = '$'+fmt(dmt/7.20,2);
+  document.getElementById('usdPrice').textContent = '$'+fmt(dmt/fxRate,2);
   document.getElementById('contractDisplay').textContent = 'LC0 = ¥'+fmt(lc,0);
   document.getElementById('resultCard').classList.add('show');
   saveParams();
@@ -957,7 +983,7 @@ document.getElementById('lio2').addEventListener('input', updateDeductionTip);
 ['lio2','recovery','deduction'].forEach(function(id) { document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')calc()}); });
 
 window.addEventListener('load', function() {
-  loadParams(); updateDeductionTip(); setMode('init'); fetchLive(); renderHistory();
+  loadParams(); updateDeductionTip(); setMode('init'); fetchLive(); renderHistory(); fetchLiveFX();
   var poll = function() {
     fetchLive();
     clearTimeout(poll._t);
