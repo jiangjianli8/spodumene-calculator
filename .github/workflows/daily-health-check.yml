@@ -67,6 +67,66 @@ jobs:
               body: lines.join(String.fromCharCode(10))
             });
 
+      - name: 推送飞书告警
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        env:
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+        with:
+          script: |
+            const fs = require('fs');
+            const NL = String.fromCharCode(10);
+
+            if (!process.env.FEISHU_WEBHOOK) {
+              core.warning('未配置 FEISHU_WEBHOOK，跳过飞书推送');
+            } else {
+              let body = '';
+              try { body = fs.readFileSync('result.txt', 'utf8'); } catch (e) {}
+              const marks = body.split(NL)
+                .filter(l => l.indexOf('✗') >= 0)
+                .map(l => l.trim().slice(0, 200));
+              const list = marks.length
+                ? marks.join(NL)
+                : '（脚本未输出明细，请查看运行日志）';
+              const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo
+                           + '/actions/runs/' + context.runId;
+              const card = {
+                msg_type: 'interactive',
+                card: {
+                  config: { wide_screen_mode: true },
+                  header: {
+                    title: { tag: 'plain_text', content: '计算器巡检发现问题' },
+                    template: 'red'
+                  },
+                  elements: [
+                    { tag: 'div', text: { tag: 'lark_md',
+                      content: '**六计算器每日巡检** ' + new Date().toISOString().slice(0, 10)
+                             + NL + '共发现 **' + marks.length + '** 处问题：' } },
+                    { tag: 'div', text: { tag: 'lark_md', content: list } },
+                    { tag: 'hr' },
+                    { tag: 'action', actions: [{
+                      tag: 'button',
+                      text: { tag: 'plain_text', content: '查看运行日志' },
+                      url: runUrl,
+                      type: 'danger'
+                    }] }
+                  ]
+                }
+              };
+              const res = await fetch(process.env.FEISHU_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(card)
+              });
+              const txt = await res.text();
+              core.info('飞书返回: ' + txt);
+              let j = {};
+              try { j = JSON.parse(txt); } catch (e) {}
+              if (j.code !== 0 && j.StatusCode !== 0) {
+                core.setFailed('飞书推送失败: ' + txt);
+              }
+            }
+
       - name: 标记本次巡检失败
         if: steps.check.outcome == 'failure'
         run: |
