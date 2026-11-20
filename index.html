@@ -807,7 +807,13 @@ function updateDeductionTip() {
   var r = getTier(v);
   if (!r) { t.textContent = '品位不在合同范围内'; return; }
   var d = document.getElementById('deduction');
-  if (!d.value || parseFloat(d.value) === r.d) d.value = r.d;
+  // 修复 2026-11-20：原条件 `parseFloat(d.value) === r.d` 恒不成立（除非 D 已等于目标值），
+  // 导致切换品位时 D 不自动匹配。实测：点 3.0% 档，D 仍为 5.0% 档的 23000，单价虚高约 566 元/吨。
+  // 正确逻辑：D 为空、或当前值仍是某一档标准值（说明用户未手动改过）时才自动匹配；
+  // 用户手动填的非标准值保留不动。
+  var _cur = parseFloat(d.value);
+  var _isStandard = TIERS.some(function(x) { return x.d === _cur; });
+  if (!d.value || isNaN(_cur) || _isStandard) d.value = r.d;
   t.textContent = '已根据品位自动匹配 D';
 }
 
