@@ -52,20 +52,48 @@ def gh(path: str, timeout: int = 30):
     return r.json(), None
 
 
+# 每个仓库的「行情更新」工作流文件路径。
+# 必须按路径精确锁定，原因有二：
+#   1. 巡检自身（daily-health-check.yml）也在 spodumene 里，按名字取最新会读到自己
+#   2. pages-build-deployment 是 Pages 部署副产品，它成功不代表行情抓取成功，
+#      若把它当「最近一次运行」，行情更新挂了也会假绿
+MARKET_WORKFLOW_PATHS = {
+    "spodumene-calculator": ".github/workflows/update_price.yml",
+    "nickel-calculator":    ".github/workflows/update-nickel-price.yml",
+    "tin-calculator":       ".github/workflows/update-price.yml",
+    "znpb-calculator":      ".github/workflows/update-prices.yml",
+    "copper-calculator":    ".github/workflows/update-copper-price.yml",
+    "tantalum-calculator":  ".github/workflows/update-price.yml",
+}
+
+
 def check_workflow(repo: str):
-    """最近一次工作流运行是否成功"""
-    data, err = gh(f"/repos/{OWNER}/{repo}/actions/runs?per_page=1")
+    """该仓库「行情更新」工作流最近一条**已完成**运行是否成功
+
+    只看已出结论的运行：行情任务每 5 分钟一跑，随时可能撞上 in_progress，
+    正在跑不算故障。
+    """
+    want = MARKET_WORKFLOW_PATHS.get(repo)
+    if not want:
+        return False, "脚本未配置该仓库的行情工作流路径"
+
+    data, err = gh(f"/repos/{OWNER}/{repo}/actions/runs?per_page=30")
     if err:
         return False, f"无法读取 Actions：{err}"
-    runs = (data or {}).get("workflow_runs") or []
+
+    runs = [
+        r for r in ((data or {}).get("workflow_runs") or [])
+        if r.get("path") == want and r.get("conclusion")
+    ]
     if not runs:
-        return False, "从未运行过工作流"
-    run = runs[0]
-    concl = run.get("conclusion") or run.get("status")
+        return False, f"「{want}」无已完成运行记录"
+
+    run = runs[0]  # 列表按时间倒序
+    concl = run.get("conclusion")
     when = (run.get("created_at") or "")[:19].replace("T", " ")
     if concl != "success":
-        return False, f"最近一次运行 = {concl}（{when}）"
-    return True, f"最近运行 success（{when}）"
+        return False, f"「{run.get('name')}」最近一次运行 = {concl}（{when}）"
+    return True, f"「{run.get('name')}」success（{when}）"
 
 
 def fetch_price_json(repo: str):
