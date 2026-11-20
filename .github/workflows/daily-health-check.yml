@@ -1,0 +1,70 @@
+name: 六计算器每日巡检
+
+on:
+  schedule:
+    # 每天 UTC 01:00 = 北京时间 09:00
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 巡检六个计算器
+        id: check
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/health_check_all.py 2>&1 | tee result.txt
+
+      - name: 发现问题时开 Issue
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '（无输出）';
+            try {
+              body = fs.readFileSync('result.txt', 'utf8').slice(0, 60000);
+            } catch (e) {}
+            const title = `⚠️ 计算器巡检发现问题 ${new Date().toISOString().slice(0,10)}`;
+            const lines = [
+              `**六仓库健康巡检发现异常，需人工维护。**`,
+              ``,
+              '```',
+              body,
+              '```',
+              ``,
+              `- [运行记录](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              `- 巡检脚本：\`scripts/health_check_all.py\``,
+              ``,
+              `**常见原因**：akshare 接口改名、数据源异常、Pages 部署失败。历史案例：2026-11-13 futures_zh_realtime 改名导致静默失败 6 天。`
+            ];
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: lines.join(String.fromCharCode(10))
+            });
+
+      - name: 标记本次巡检失败
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "巡检发现问题，详见上方输出与已创建的 Issue"
+          exit 1
