@@ -30,9 +30,23 @@ MAX_RETRIES = 3      # 最大重试次数
 RETRY_DELAY = 10      # 重试间隔（秒）
 
 
+def _fetch_realtime_df(symbol):
+    """调用 akshare 实时行情，兼容新旧接口名。
+
+    akshare 1.20.44 起将 futures_zh_realtime 更名为 futures_zh_realtime_sina
+    （旧名已移除，直接调用会抛 AttributeError 导致工作流静默失败）。
+    实测新接口参数与返回列与旧版完全一致，故做双版本兼容：
+    - 新版 akshare（>=1.20.44，CI 环境）→ futures_zh_realtime_sina
+    - 旧版 akshare（<=1.18.x，本机环境）→ futures_zh_realtime
+    """
+    if hasattr(ak, "futures_zh_realtime_sina"):
+        return ak.futures_zh_realtime_sina(symbol=symbol)
+    return ak.futures_zh_realtime(symbol=symbol)
+
+
 def fetch_lc_price():
     """从新浪财经获取碳酸锂期货实时行情（盘中实时刷新）"""
-    df = ak.futures_zh_realtime(symbol=SYMBOL)
+    df = _fetch_realtime_df(SYMBOL)
 
     if df.empty:
         raise ValueError(f"未获取到 {SYMBOL} 实时行情数据")
