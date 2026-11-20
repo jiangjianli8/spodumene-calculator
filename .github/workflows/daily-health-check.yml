@@ -31,7 +31,11 @@ jobs:
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python scripts/health_check_all.py 2>&1 | tee result.txt
+        # 必须开 pipefail：默认管道的退出码取 tee 的 0，
+        # 脚本的 exit 1 会被吞掉，导致巡检永远绿、从不开 Issue。
+        run: |
+          set -o pipefail
+          python -X utf8 scripts/health_check_all.py 2>&1 | tee result.txt
 
       - name: 发现问题时开 Issue
         if: steps.check.outcome == 'failure'
