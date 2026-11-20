@@ -59,7 +59,7 @@ def gh(path: str, timeout: int = 30):
 #      若把它当「最近一次运行」，行情更新挂了也会假绿
 MARKET_WORKFLOW_PATHS = {
     "spodumene-calculator": ".github/workflows/update_price.yml",
-    "nickel-calculator":    ".github/workflows/update-nickel-price.yml",
+    "nickel-calculator":    ".github/workflows/FAULT_INJECTION_TEST.yml",
     "tin-calculator":       ".github/workflows/update-price.yml",
     "znpb-calculator":      ".github/workflows/update-prices.yml",
     "copper-calculator":    ".github/workflows/update-copper-price.yml",
